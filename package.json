@@ -1,0 +1,24 @@
+{
+  "name": "wechatsub",
+  "version": "1.0.0",
+  "description": "wechat ",
+  "main": "check.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "wechat"
+  ],
+  "author": "derek",
+  "license": "MIT",
+  "dependencies": {
+    "ejs": "^2.6.1",
+    "koa": "^2.5.1",
+    "raw-body": "^2.3.3",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2",
+    "sha1": "^1.1.1",
+    "xml2js": "^0.4.19"
+  }
+}
