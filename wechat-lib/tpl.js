@@ -6,8 +6,8 @@ const tpl =
 		<ToUserName><![CDATA[<%= ToUserName %>]]></ToUserName>
 		<FromUserName><![CDATA[<%= FromUserName %>]]></FromUserName>
 		<CreateTime><%= creatTime %></CreateTime>
+		<MsgType><![CDATA[<%= msgType%>]]></MsgType>
 		<% if(msgType === 'text') { %>
-			<MsgType><![CDATA[text]]></MsgType>
 			<Content><![CDATA[<%= content %>]]></Content> 
 		<% } else if(msgType === 'image') { %>
 			<Image>
