@@ -4,12 +4,28 @@ const base = 'https://api.weixin.qq.com/cgi-bin'
 const api = {
 	accessToken: '/token?grant_type=client_credential',
 	temporary: {
-		upload: base + '/media/upload?'
+		upload: base + '/media/upload?',
+		fetch: base + '/media/get?'
 	},
 	permannent: {
 		uploadNews: base + '/material/add_news?',
 		upload: base + '/material/add_material?',
-		uploadNewsPic: base + '/media/uploadimg?'
+		uploadNewsPic: base + '/media/uploadimg?',
+		fetch: base + '/material/get_material?',
+		del: base + '/material/del_material?',
+		update: base + '/material/update_news?',
+		batch: base + '/material/batchget_material?',
+		count: base + '/material/get_materialcount?'
+	},
+	tag: {
+		create: base + '/tags/create?',
+		fetch: base + '/tags/get?',
+		update: base + '/tags/update?',
+		del: base + '/tags/delete?',
+		fetchUsers: base + '/user/tag/get?',
+		batchTag: base + '/tags/members/batchtagging?',
+		batchUnTag: base + '/tags/members/batchuntagging?',
+		getUserTags: base + '/tags/getidlist?',
 		
 	}
 }
@@ -27,6 +43,8 @@ module.exports = class Wechat {
 
 	async request(options) {
 		options = Object.assign({}, options, {json:true})
+		console.log('检查请求参数')
+		console.log(options)
 
 		try {
 			const res = await request(options)
@@ -110,7 +128,7 @@ module.exports = class Wechat {
 		if (!permannent) {
 			uploadUrl += `&type=${type}`
 		} else {
-			if (type != 'news') {
+			if (type !== 'news') {
 				form.access_token = token
 			}
 		}
@@ -119,7 +137,6 @@ module.exports = class Wechat {
 			method: 'POST',
 			url: uploadUrl,
 			json: true,
-			formData: form
 		}
 
 		//图文和非图文在 request 提交主体判断
@@ -138,5 +155,157 @@ module.exports = class Wechat {
 		const data = await this.request(options)
 
 		return data
+	}
+
+	//获取素材本身
+	fetchMaterial (token, mediaId, type, permannent) {
+		let form = {}
+		let fetchUrl = api.temporary.fetch
+		
+		if (permannent) {
+			fetchUrl = api.permannent.fetch
+		}
+
+		let url = fetchUrl + 'access_token=' + token
+		let options = {method: 'POST', url: url}
+
+		if (permannent) {
+			form.media_id = mediaId
+			form.access_token = token
+			options.body = form
+		} else {
+			if( type === 'video') {
+				url = url.replace('https:', 'http:')
+			}
+
+			options.method = 'GET'
+			url += '&media_id=' + mediaId
+		}
+
+		return options
+	}
+
+	//删除素材
+	deleteMaterial (token, mediaId) {
+		let form = {
+			media_id: mediaId
+		}
+
+		const url = `${api.permannent.del}access_token=${token}&media_id=${mediaId}`
+
+		return { method: 'POST', url: url, body: form}
+	}
+
+	//更新素材
+	updateMaterial (token, mediaId, news) {
+		let form = {
+			media_id: mediaId
+		}
+
+		form = Object.assign(form, news)
+
+		const url = `${api.permannent.update}access_token=${token}&media_id=${mediaId}`
+
+		return { method: 'POST', url: url, body: form}
+	}
+
+	//获取素材总数
+	countMaterial (token) {
+		const url = `${api.permannent.count}access_token=${token}`
+
+		return { method: 'GET', url: url}
+	}
+
+	//获取素材列表
+	batchMaterial (token, options) {
+		options.type = options.type || 'image'
+		options.offset = options.offset || 0
+		options.count = options.count || 10
+
+		const url = `${api.permannent.batch}access_token=${token}`
+
+		return { method: 'POST', url: url, body: options}
+	}
+
+	//创建标签
+	createTag (token, name) {
+		const body = {
+			tag: {
+				name
+			}
+		}
+
+		const url = api.tag.create + 'access_token=' + token
+
+		return {method: 'POST', url, body}
+	}
+
+	//获取全部标签
+	fetchTags (token) {
+		const url = api.tag.fetch + 'access_token=' + token
+
+		return {url}
+	}
+
+	//编辑标签
+	updateTag (token, id, name) {
+		const body = {
+			tag: {
+				id,
+				name
+			}
+		}
+
+		const url = api.tag.update + 'access_token=' + token
+
+		return {method: 'POST', url, body}
+	}
+
+	//删除标签
+	delTag (token, id,) {
+		const body = {
+			tag: {
+				id
+			}
+		}
+
+		const url = api.tag.del + 'access_token=' + token
+
+		return {method: 'POST', url, body}
+	}
+
+	//获取标签下的的粉丝列表
+	fetchTagUsers (token, id, openID) {
+		const body = {
+			tagid: id,
+			next_openid: openID || ''
+		}
+
+		const url = api.tag.fetchUsers + 'access_token=' + token
+
+		return {method: 'POST', url, body}
+	}
+
+	//批量加标签/取消标签
+	batchTag (token, openidList, id, unTag) {
+		const body = {
+			openid_list: openidList,
+			tagid: id
+		}
+
+		let url = !unTag ? api.tag.batchTag : api.tag.batchUnTag
+		url += 'access_token=' + token 
+
+		return {method: 'POST', url, body}
+	}
+
+	getUserTags (token, openID) {
+		const body = {
+			openid: openID
+		}
+
+		const url = api.tag.getUserTags + 'access_token=' + token 
+
+		return {method: 'POST', url, body}
 	}
 }
