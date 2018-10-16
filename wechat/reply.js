@@ -4,8 +4,15 @@ exports.reply = async (ctx, next) => {
 
 	let mp = require('./index')
 	let client = mp.getWechat()
+	if(message.MsgType === 'event') {
+		let reply = ''
+		if (message.Event === 'LOCATION') {
+			reply = `您上报的位置是${message.Latitude}-${message.Longitude}-${message.Precision}`
+		}
 
-	if(message.MsgType === "text") {
+		ctx.body = reply
+
+	} else if(message.MsgType === "text") {
 		let content = message.Content
 		let reply = `Oh 你说的 ${content} 太复杂了 无法解析`
 		if (content === '1') {
@@ -180,6 +187,34 @@ exports.reply = async (ctx, next) => {
 			console.log(userTags)
 
 			reply = tagsData.tags.length
+		} else if (content === '11') {
+
+			let userList = await client.handle('fetchUserList')
+			console.log(userList)
+
+			reply = userList.total + '关注者'
+		} else if (content === '12') {
+
+			await client.handle('remarkUser', message.FromUserName, 'derekderek')
+
+			reply = '改名成功'
+		} else if (content === '13') {
+
+			const userInfoData = await client.handle('getUserInfo', message.FromUserName)
+
+			console.log(userInfoData)
+
+			reply = JSON.stringify(userInfoData)
+		} else if (content === '14') {
+
+			const batchUsersInfo = await client.handle('remarkUser', [{
+				openid: message.FromUserName,
+				lang: "zh_CN"
+			}])
+
+			console.log(batchUsersInfo)
+
+			reply = JSON.stringify(batchUsersInfo)
 		}
 
 		ctx.body = reply

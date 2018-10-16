@@ -1,6 +1,7 @@
 const request = require('request-promise')
 const fs = require('fs')
 const base = 'https://api.weixin.qq.com/cgi-bin'
+const mpBase = 'https://mp.weixin.qq.com/cgi-bin'
 const api = {
 	accessToken: '/token?grant_type=client_credential',
 	temporary: {
@@ -27,6 +28,16 @@ const api = {
 		batchUnTag: base + '/tags/members/batchuntagging?',
 		getUserTags: base + '/tags/getidlist?',
 		
+	},
+	user: {
+		fetch: base + '/user/get?',
+		remark: base + '/user/info/updateremark?',
+		info: base + '/user/info?',
+		batch: base + '/user/info/batchget?'
+	},
+	qrcode: {
+		create: base + '/qrcode/create?',
+		show: mpBase + '/showqrcode?'
 	}
 }
 
@@ -308,4 +319,61 @@ module.exports = class Wechat {
 
 		return {method: 'POST', url, body}
 	}
+
+	//获取粉丝列表
+	fetchUserList (token, openID) {
+
+		const url = api.user.fetch + 'access_token=' + token + '&next_openid=' + (openID || '') 
+
+		return {url}
+	}
+
+	//给用户设置别名-服务号专用接口
+	remarkUser (token, openID, remark) {
+		const body = {
+			openid: openID,
+			remark,
+		}
+
+		const url = api.user.remark + 'access_token=' + token 
+
+		return {method: 'POST', url, body}
+	}
+
+	//获取用户的详细信息
+	getUserInfo (token, openID, lang = 'zh_CN') {
+
+		const url = api.user.info + 'access_token=' + token + '&openid=' + openID  + '&lang=' + lang
+
+		return {url}
+	}
+
+	//批量获取用户详细信息
+	remarkUser (token, openIdList) {
+		const body = {
+			user_list: openIdList,
+		}
+
+		const url = api.user.batch + 'access_token=' + token 
+
+		return {method: 'POST', url, body}
+	}
+
+	//创建二维码ticket
+	createQrcode (token, qr) {
+		const body = qr
+
+		const url = api.qrcode.create + 'access_token=' + token 
+
+		return {method: 'POST', url, body}
+	}
+
+	//通故ticket换取二维码
+	getUserInfo (ticket) {
+
+		const url = api.qrcode.show + 'ticket=' + UrlEncode(ticket)
+
+		return {url}
+	}
+	
 }
