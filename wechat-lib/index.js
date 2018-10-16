@@ -2,7 +2,9 @@ const request = require('request-promise')
 const fs = require('fs')
 const base = 'https://api.weixin.qq.com/cgi-bin'
 const mpBase = 'https://mp.weixin.qq.com/cgi-bin'
+const semanticUrl = 'https://api.weixin.qq.com/semantic/semproxy/search?'
 const api = {
+	semanticUrl,
 	accessToken: '/token?grant_type=client_credential',
 	temporary: {
 		upload: base + '/media/upload?',
@@ -38,6 +40,12 @@ const api = {
 	qrcode: {
 		create: base + '/qrcode/create?',
 		show: mpBase + '/showqrcode?'
+	},
+	shortUrl: {
+		create: base + '/shorturl?'
+	},
+	ai: {
+		translate: base + '/media/voice/translatecontent?'
 	}
 }
 
@@ -368,12 +376,39 @@ module.exports = class Wechat {
 		return {method: 'POST', url, body}
 	}
 
-	//通故ticket换取二维码
-	getUserInfo (ticket) {
+	//通过ticket换取二维码
+	showQrCode (ticket) {
 
-		const url = api.qrcode.show + 'ticket=' + UrlEncode(ticket)
+		const url = api.qrcode.show + 'ticket=' + encodeURI(ticket)
 
-		return {url}
+		return url
 	}
-	
+
+	//长连接转段连接
+	createShortUrl (token, long_url) {
+		const body = {
+			action: 'long2short',
+			long_url
+		}
+
+		const url = api.shortUrl.create + 'access_token=' + token 
+
+		return {method: 'POST', url, body}
+	}
+
+	//语义理解-查询特定的语句进行分析
+	semantic (token, semanticData) {
+
+		const url = api.semanticUrl + 'access_token=' + token
+
+		semanticData.appid = this.appID
+
+		return {method: 'POST', url, body: semanticData}
+	}
+
+	voiceTranslate (token, body, lfrom, lto) {
+		const url = api.ai.translate + 'access_token=' + token + '&lfrom=' + lfrom + '&lto=' + lto
+
+		return {method: 'POST', url, body} 
+	}
 }

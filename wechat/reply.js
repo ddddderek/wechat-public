@@ -215,6 +215,79 @@ exports.reply = async (ctx, next) => {
 			console.log(batchUsersInfo)
 
 			reply = JSON.stringify(batchUsersInfo)
+		} else if (content === '15') {
+			//临时票据
+			// let tempQr = {
+			// 	expire_seconds: 400000,
+			// 	action_name: 'QR_SCENE',
+			// 	action_info: {
+			// 		scene: {
+			// 			scene_id: 101
+			// 		}
+			// 	}}
+			// let tempTicketData = await client.handle('createQrcode', tempQr)
+
+			// console.log(tempTicketData)
+
+			// let temQr = client.showQrCode(tempTicketData.ticket)
+
+			// console.log(temQr)
+
+			//永久票据
+			let qrData = {
+				action_name: 'QR_LIMIT_SCENE',
+				action_info: {
+					scene: {
+						scene_id: 99
+					}
+				}}
+			let ticketData = await client.handle('createQrcode', qrData)
+
+			console.log(ticketData)
+
+			let qr = client.showQrCode(ticketData.ticket)
+
+			console.log(qr)
+
+			reply = qr.url
+		} else if (content === '16') {
+			//永久票据
+			let qrData = {
+				action_name: 'QR_LIMIT_SCENE',
+				action_info: {
+					scene: {
+						scene_id: 102
+					}
+				}}
+			let ticketData = await client.handle('createQrcode', qrData)
+			let qr = client.showQrCode(ticketData.ticket)
+			console.log(qr)
+
+			let shorData = await client.handle('createShortUrl', qr)	
+
+			console.log(shorData)
+
+			reply = shorData.short_url
+		} else if (content === '17') {
+			let semanticData = {
+				query:'查一下明天从北京到上海的南航机票',
+				city:'北京',
+				category: 'flight,hotel',
+				uid:message.FromUserName
+			}
+			let searchData = await client.handle('semantic', semanticData)
+			
+			console.log(searchData)
+
+			reply = JSON.stringify(searchData)
+		} else if (content === '18') {
+			let body = '编程语言难学么'
+				
+			let translateData = await client.handle('voiceTranslate', body, 'zh_CN', 'en_US')
+			
+			console.log(translateData)
+
+			reply = translateData.to_content
 		}
 
 		ctx.body = reply
