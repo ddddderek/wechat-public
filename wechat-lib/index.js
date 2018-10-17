@@ -46,6 +46,12 @@ const api = {
 	},
 	ai: {
 		translate: base + '/media/voice/translatecontent?'
+	},
+	menu: {
+		create: base + '/menu/create?',
+		del: base + '/menu/delete?',
+		custom: base + '/menu/addconditional?',
+		fetch: base + '/menu/get?'
 	}
 }
 
@@ -406,9 +412,37 @@ module.exports = class Wechat {
 		return {method: 'POST', url, body: semanticData}
 	}
 
+	//翻译功能
 	voiceTranslate (token, body, lfrom, lto) {
 		const url = api.ai.translate + 'access_token=' + token + '&lfrom=' + lfrom + '&lto=' + lto
 
 		return {method: 'POST', url, body} 
+	}
+
+	//自定义、创建菜单
+	createMenu (token, menu, rules) {
+		let url = api.menu.create + 'access_token=' + token
+
+		if (rules) {
+			url = api.menu.custom + 'access_token=' + token
+
+			menu.matchrule = rules
+		}
+
+		return {method: 'POST', url, body: menu} 
+	}
+
+	//删除菜单
+	deleteMenu (token) {
+		const url = api.menu.del + 'access_token=' + token
+
+		return {url} 
+	}
+
+	//获取菜单
+	fetchMenu (token) {
+		const url = api.menu.fetch + 'access_token=' + token
+
+		return {url} 
 	}
 }

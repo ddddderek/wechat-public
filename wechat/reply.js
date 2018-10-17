@@ -4,10 +4,46 @@ exports.reply = async (ctx, next) => {
 
 	let mp = require('./index')
 	let client = mp.getWechat()
-	if(message.MsgType === 'event') {
+	if (message.MsgType === 'image') {
+		reply = message.PicUrl
+		console.log(message.PicUrl)
+	} else if(message.MsgType === 'event') {
 		let reply = ''
-		if (message.Event === 'LOCATION') {
+		if (message.Event === 'subscribe') {
+			reply = `欢迎订阅` + '! 扫码参数' + message.EventKey + '-' + message.Ticket
+			console.log(reply = `欢迎订阅` + '! 扫码参数' + message.EventKey + '-' + message.Ticket)
+		} else if (message.Event === 'unsubscribe') {
+			reply = '无情取消订阅'
+		} else if (message.Event === 'SCAN') {
+			reply = `关注后扫二维码` + '! 扫码参数' + message.EventKey + '-' + message.Ticket
+			console.log(`关注后扫二维码` + '! 扫码参数' + message.EventKey + '-' + message.Ticket)
+		}else if (message.Event === 'LOCATION') {
 			reply = `您上报的位置是${message.Latitude}-${message.Longitude}-${message.Precision}`
+			console.log(`您上报的位置是${message.Latitude}-${message.Longitude}-${message.Precision}`)
+		} else if (message.Event === 'CLICK') {
+			reply = '你点击菜单的' + message.EventKey
+			console.log('你点击菜单的' + message.EventKey)
+		} else if (message.Event === 'VIEW') {
+			reply = '你点击菜单链接' + message.EventKey + message.MenuID
+			console.log('你点击菜单链接' + message.EventKey + message.MenuID)
+		} else if (message.Event === 'scancode_push') {
+			reply = '你扫码了' + message.ScanCodeInfo + message.ScanCodeInfo.ScanResult + message.ScanCodeInfo.ScanType
+			console.log('你扫码了' + message.ScanCodeInfo + message.ScanCodeInfo.ScanResult + message.ScanCodeInfo.ScanType)
+		} else if (message.Event === 'scancode_waitmsg') {
+			reply = '你扫码了' + message.ScanCodeInfo + message.ScanCodeInfo.ScanResult + message.ScanCodeInfo.ScanType
+			console.log('你扫码了' + message.ScanCodeInfo + message.ScanCodeInfo.ScanResult + message.ScanCodeInfo.ScanType)
+		} else if (message.Event === 'pic_sysphoto') {
+			reply = '系统拍照' + message.SendPicsInfo.Count + JSON.stringify(message.SendPicsInfo.PicList)
+			console.log('系统拍照' + message.SendPicsInfo.Count + JSON.stringify(message.SendPicsInfo.PicList))
+		} else if (message.Event === 'pic_photo_or_album') {
+			reply = '拍照或者相册' + message.SendPicsInfo.Count + JSON.stringify(message.SendPicsInfo.PicList)
+			console.log('拍照或者相册' + message.SendPicsInfo.Count + JSON.stringify(message.SendPicsInfo.PicList))
+		} else if (message.Event === 'pic_weixin') {
+			reply = '微信相册发图' + message.SendPicsInfo.Count + JSON.stringify(message.SendPicsInfo.PicList)
+			console.log('微信相册发图' + message.SendPicsInfo.Count + JSON.stringify(message.SendPicsInfo.PicList))
+		} else if (message.Event === 'location_select') {
+			reply = '地理位置' + JSON.stringify(message.SendLocationInfo)
+			console.log('地理位置' + JSON.stringify(message.SendLocationInfo))
 		}
 
 		ctx.body = reply
@@ -288,6 +324,141 @@ exports.reply = async (ctx, next) => {
 			console.log(translateData)
 
 			reply = translateData.to_content
+		} else if (content === '19') {
+			try {
+				await client.handle('deleteMenu')
+
+				let menu = {
+					button:[
+						{
+							name: '一级菜单',
+							sub_button: [
+								{
+									name: '二级菜单 1',
+									type: 'click',
+									key: 'no_1'
+								},
+								{
+									name: '二级菜单 2',
+									type: 'click',
+									key: 'no_2'
+								},
+								{
+									name: '二级菜单 3',
+									type: 'click',
+									key: 'no_3'
+								},
+								{
+									name: '二级菜单 4',
+									type: 'click',
+									key: 'no_4'
+								},
+								{
+									name: '二级菜单 5',
+									type: 'click',
+									key: 'no_5'
+								},
+							]
+						},
+						{  
+			               name: "搜索",
+			               type: "view",
+			               url: 'http://www.soso.com/',
+						},
+						{
+							name: '新菜单_' + Math.random(),
+							type: 'click',
+							key: 'new_111'
+						}
+					]
+				}
+					
+				await client.handle('createMenu', menu)
+
+			} catch (e) {
+				console.log(e)
+			}
+			
+			
+			reply = '菜单创建成功请等待5分钟，或者先取消关注，再重新关注就可以看到新菜单'
+		} else if (content === '20') {
+			try {
+				// await client.handle('deleteMenu')
+
+				let menu = {
+					button:[
+						{
+							name: 'Scan_photo',
+							sub_button: [
+								{
+									name: '系统拍照',
+									type: 'pic_sysphoto',
+									key: 'no_1'
+								},
+								{
+									name: '拍照或者相册发图',
+									type: 'pic_photo_or_album',
+									key: 'no_2'
+								},
+								{
+									name: '微信相册发图',
+									type: 'pic_weixin',
+									key: 'no_3'
+								},
+								{
+									name: '扫码',
+									type: 'scancode_push',
+									key: 'no_4'
+								},
+								{
+									name: '等待中扫码',
+									type: 'scancode_waitmsg',
+									key: 'no_5'
+								},
+							]
+						},
+						{  
+			               name: "跳新连接",
+			               type: "view",
+			               url: 'http://www.soso.com/',
+						},
+						{
+							name: '其他',
+							sub_button: [
+								{
+									name: '点击',
+									type: 'click',
+									key: 'no_11'
+								},
+								{
+									name: '地理位置',
+									type: 'location_select',
+									key: 'no_12'
+								}
+							]
+						}
+					]
+				}
+				let rules = {
+					// tag_id:"2",
+					// sex:"1",
+					// country:"中国",
+					// province:"广东",
+					// city:"广州",
+					// client_platform_type:"2",
+					language:'zh_CN'
+				}
+				let createData = await client.handle('createMenu', menu , rules)
+
+			} catch (e) {
+				console.log(e)
+			}
+			
+			let menus = await client.handle('fetchMenu')
+
+			console.log(JSON.stringify(menus))
+			
+			reply = '菜单创建成功请等待5分钟，或者先取消关注，再重新关注就可以看到新菜单'
 		}
 
 		ctx.body = reply
