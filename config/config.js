@@ -5,5 +5,6 @@ module.exports = {
 		appID: 'wx880680f7ad1e2b15',
 		appSecret: 'c57e417cea0100256cf6da6f29a72860',
 		token: 'wechatisreallynice123'
-	}
+	},
+	baseUrl: 'http://derek.vipgz1.idcfengye.com/'
 }

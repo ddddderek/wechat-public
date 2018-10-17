@@ -1,4 +1,5 @@
 const Koa = require('koa')
+const Router = require('koa-router')
 const wechat = require('./wechat-lib/middleware')
 const config = require('./config/config')
 const { reply } = require('./wechat/reply')
@@ -11,9 +12,11 @@ const { initSchemas, connect } = require('./app/datebase/init')
 	initSchemas()
 
 	//生成服务器实例
-	const app =new Koa()
+	const app = new Koa()
+	const router = new Router
 
-	app.use(wechat(config.wechat, reply))
+	require('./config/routes')(router)
+	app.use(router.routes()).use(router.allowedMethods())
 
 	app.listen(3000)
 
