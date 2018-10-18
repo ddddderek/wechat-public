@@ -52,6 +52,9 @@ const api = {
 		del: base + '/menu/delete?',
 		custom: base + '/menu/addconditional?',
 		fetch: base + '/menu/get?'
+	},
+	ticket: {
+		get: base + '/ticket/getticket?'
 	}
 }
 
@@ -62,6 +65,8 @@ module.exports = class Wechat {
 		this.appSecret = opts.appSecret
 		this.getAccessToken = opts.getAccessToken
 		this.saveAccessToken = opts.saveAccessToken
+		this.getTicket = opts.getTicket
+		this.saveTicket = opts.saveTicket
 
 		this.fetchAccessToken()
 	} 
@@ -73,7 +78,7 @@ module.exports = class Wechat {
 
 		try {
 			const res = await request(options)
-
+			console.log(res)
 			return res
 		} catch (err) {
 			console.log(err)
@@ -87,7 +92,7 @@ module.exports = class Wechat {
 		let data = await this.getAccessToken()
 
 
-		if(!this._isValidToken(data)) {
+		if(!this._isValid(data)) {
 			data = await this.updateAccessToken()
 		}
 		
@@ -100,6 +105,29 @@ module.exports = class Wechat {
 	async updateAccessToken () {
 		const url = `${base}${api.accessToken}&appid=${this.appID}&secret=${this.appSecret}`
 
+		let data = await this.request({ url })
+		const now = new Date().getTime()
+		const expiresIn = now + (data.expires_in - 20) * 1000
+
+		data.expires_in = expiresIn
+		return data
+	}
+
+	//获取全局ticket
+	async fetchTicket (token) {
+		let data = this.getTicket()
+
+		if (!this._isValid(data)) {
+			data = await this.updateTicket(token)
+		}
+
+		await this.saveTicket(data)
+		return data
+	}
+
+	//获取 ticket
+	async updateTicket (token) {
+		const url = `${api.ticket.get}access_token=${token}&type=jsapi`
 		const data = await this.request({ url })
 		const now = new Date().getTime()
 		const expiresIn = now + (data.expires_in - 20) * 1000
@@ -108,7 +136,7 @@ module.exports = class Wechat {
 		return data
 	}
 
-	_isValidToken (data) {
+	_isValid (data) {
 		if (!data || !data.expires_in) {
 			return false
 		}

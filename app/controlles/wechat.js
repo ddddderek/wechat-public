@@ -1,14 +1,13 @@
 const { reply } = require('../../wechat/reply')
 const config = require('../../config/config')
-const { getOAuth } = require('../../wechat/index')
 const wechatMiddle = require('../../wechat-lib/middleware')
+const api = require('../api')
 
 //接入微信消息中间件
 exports.sdk = async (ctx, next) => {
-	await ctx.render('wechat/sdk.pug',{
-		title: 'SDK Test',
-		desc: '测试 SDK'
-	})
+	const url = ctx.href
+	const params = await api.wechat.getSignature(url)
+	await ctx.render('wechat/sdk.pug', params)
 }
 
 //接入微信消息中间件
@@ -19,11 +18,10 @@ exports.hear = async (ctx, next) => {
 }
 
 exports.oauth = async (ctx, next) => {
-	const oauth = getOAuth()
 	const target = config.baseUrl + 'userinfo'
 	const scope = 'snsapi_userinfo'
 	const state = ctx.query.id
-	const url = oauth.getAuthorizeURL(scope, target, state)
+	const url = api.wechat.getAuthorizeUrl(scope, target, state)
 
 	ctx.redirect(url)
 }

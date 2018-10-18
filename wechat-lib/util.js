@@ -1,5 +1,6 @@
 const xml2js = require('xml2js')
 const template = require('./tpl')
+const sha1 = require('sha1')
 
 exports.parseXML = xml => {
 	return new Promise((resolve, reject) => {
@@ -67,5 +68,64 @@ exports.tpl = (content, message) => {
 
 	return template(info)
 }
+	
+
+//加密签名入口方法
+exports.sign = (ticket, url) => {
+	//生成随机穿
+	const noncestr = _createNonce()
+	//生成时间戳
+	const timestamp = _createTimestamp()
+	//加密
+	const signature = _shaIt(noncestr, ticket, timestamp, url)
+
+	return {
+		noncestr,
+		timestamp,
+		signature
+	}
+}
 
 exports.formatMessage = formatMessage
+
+
+const _createNonce = () => {
+	return Math.random().toString(36).substr(2,16)
+}
+
+const _createTimestamp = () => {
+	return parseInt(new Date().getTime() / 1000, 10) + ''
+}
+
+//字段排序
+const _signIt = (paramsObj) => {
+	let keys = Object.keys(paramsObj)
+	let newArgs = {}
+	let str = ''
+
+	keys = keys.sort()
+
+	keys.forEach(key => {
+		newArgs[key.toLowerCase()] = paramsObj[key]
+	})
+
+	for(let k in newArgs) {
+		str += '&' + k + '=' + newArgs[k]
+	}
+
+	return str.substr(1)
+}
+const _shaIt = (nonce, ticket, timestamp, url) => {
+	const ret = {
+		jsapi_ticket: ticket,
+		noncestr: nonce,
+		timestamp,
+		url
+	}
+
+	const str = _signIt(ret)
+
+	const sha = sha1(str)
+
+	return sha
+}

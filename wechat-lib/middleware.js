@@ -9,16 +9,16 @@ module.exports = (config,reply) => {
 		let  str = [token, timestamp ,nonce].sort().join('')
 		const sha = sha1(str)
 
-		if(ctx.method === 'GET') {
-			if(sha == signature) {
-				ctx.body = echostr
-			} else {
-				ctx.body = 'Failed'
-			}
-		} else if (ctx.method === 'POST') {
-			if(sha !== signature) {
-				return ctx.body = 'Failed'
-			}
+    if (ctx.method === 'GET') {
+      if (sha === signature) {
+        ctx.body = echostr
+      } else {
+        ctx.body = 'Failed'
+      }
+    } else if (ctx.method === 'POST') {
+      if (sha !== signature) {
+        return (ctx.body = 'Failed')
+      }
 
 			const data = await getRawBody(ctx.req, {
 				length: ctx.length,

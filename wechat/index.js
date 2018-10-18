@@ -4,6 +4,7 @@ const config = require('../config/config')
 const mongoose = require('mongoose')
 
 const Token = mongoose.model('Token')
+const Ticket = mongoose.model('Ticket')
 
 const wechatCfg = {
 	wechat: {
@@ -19,7 +20,17 @@ const wechatCfg = {
 			const res = await Token.saveAccessToken(data)
 
 			return res
-		} 
+		},
+		getTicket: async () => {
+			const res = await Ticket.getTicket()
+
+      		return res
+    	},
+    	saveTicket: async (data) => {
+      		const res = await Ticket.saveTicket(data)
+
+			return res
+		}  
 	}
 }
 
