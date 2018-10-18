@@ -4,6 +4,14 @@ const { getOAuth } = require('../../wechat/index')
 const wechatMiddle = require('../../wechat-lib/middleware')
 
 //接入微信消息中间件
+exports.sdk = async (ctx, next) => {
+	await ctx.render('wechat/sdk.pug',{
+		title: 'SDK Test',
+		desc: '测试 SDK'
+	})
+}
+
+//接入微信消息中间件
 exports.hear = async (ctx, next) => {
 	const middle = wechatMiddle(config.wechat, reply)
 
