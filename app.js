@@ -1,10 +1,11 @@
 const Koa = require('koa')
 const { resolve } = require('path')
+const session = require('koa-session')
+const BodyParser = require('koa-bodyparser')
+const mongoose = require('mongoose')
 const moment = require('moment')
 const Router = require('koa-router')
-const wechat = require('./wechat-lib/middleware')
 const config = require('./config/config')
-const { reply } = require('./wechat/reply')
 const { initSchemas, connect } = require('./app/datebase/init')
 
 
@@ -25,6 +26,36 @@ const { initSchemas, connect } = require('./app/datebase/init')
 	    }
 	}))
 
+	app.keys = ['imooc']
+	app.use(session(app))
+	app.use(async (ctx, next) => {
+		const User = mongoose.model('User')
+		let user = ctx.session.user
+
+		if(user && user._id) {
+			user = await User.findOne({ _id: user._id })
+			ctx.session.user = {
+				_id: user._id,
+				role: user.role,
+				nickname: user.nickname
+			}
+
+			ctx.state = Object.assign(ctx.state, {
+				user: {
+					_id: user._id,
+					role: user.role,
+					nickname: user.nickname
+				}
+			})
+		} else {
+			ctx.session.user = null
+		}
+
+		await next()
+		
+	})
+
+	app.use(BodyParser())
 	require('./config/routes')(router)
 	app.use(router.routes()).use(router.allowedMethods())
 

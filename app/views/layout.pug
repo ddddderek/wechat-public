@@ -2,7 +2,9 @@ doctype
 html
 	head
 		meta(chartset="utf8")
-		title #title
+		title #{title}
+		include ./includes/wechat-head
 		include ./includes/head
 	body
+		include ./includes/header
 		block content
