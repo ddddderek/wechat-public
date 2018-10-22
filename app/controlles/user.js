@@ -13,6 +13,7 @@ exports.showSignin = async (ctx, next) => {
 
 // 用户数据持久化
 exports.signup = async (ctx, next) => {
+	console.log(ctx.request.body)
 	const {
 		email,
 		password,
