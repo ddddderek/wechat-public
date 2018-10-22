@@ -1,7 +1,13 @@
+const { readFile, writeFile } = require('fs')
+const { resolve } = require('path')
 const mongoose = require('mongoose')
 const Movie = mongoose.model('Movie')
 const Category = mongoose.model('Category') 
 const _ = require('lodash')
+const util = require('util')
+
+const readFileAsync = util.promisify(readFile) 
+const writeFileAsync = util.promisify(writeFile) 
 
 //电影的录入页面
 exports.show = async (ctx, next) => {
@@ -21,14 +27,40 @@ exports.show = async (ctx, next) => {
 	})
 }
 
+exports.savePoster = async (ctx, next) => {
+	const posterData = ctx.request.body.files.uploadPoster
+	const filePath = posterData.path
+	const fileName = posterData.name
+	if (fileName) {
+		const data = await readFileAsync(filePath)
+		const timestamp = Date.now()
+		const type = posterData.type.split('/')[1]
+		const poster = timestamp + '.' + type
+		console.log(111111111111)
+		console.log(data)
+		console.log(3333333333333)
+		const newPath = resolve(__dirname, '../../public/upload/' + poster)
+		console.log(newPath)
+		console.log(222222222222222)
+		await writeFileAsync(newPath, data)
+		console.log(44444444444444)
+		ctx.poster = poster
+	}
+
+	await next()
+}
+
 //电影的创建持久化
 exports.new = async (ctx, next) => {
-	console.log(ctx.request.body)
-	const movieData = ctx.request.body || {}
+	const movieData = ctx.request.body.fields || {}
 	let movie
 	if (movieData._id) {
 		movie = await Movie.findOne({ _id: movieData._id })
 	} 
+
+	if (ctx.poster) {
+		movieData.poster = ctx.poster
+	}
 
 	const categoryId = movieData.categoryId
 	const categoryName = movieData.categoryName

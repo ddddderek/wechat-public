@@ -1,6 +1,7 @@
 const Koa = require('koa')
 const { resolve } = require('path')
 const session = require('koa-session')
+const server = require('koa-static')
 const BodyParser = require('koa-bodyparser')
 const mongoose = require('mongoose')
 const moment = require('moment')
@@ -28,6 +29,8 @@ const { initSchemas, connect } = require('./app/datebase/init')
 
 	app.keys = ['imooc']
 	app.use(session(app))
+	app.use(BodyParser())
+	app.use(server(resolve(__dirname, './public')))
 	app.use(async (ctx, next) => {
 		const User = mongoose.model('User')
 		let user = ctx.session.user
@@ -55,7 +58,6 @@ const { initSchemas, connect } = require('./app/datebase/init')
 		
 	})
 
-	app.use(BodyParser())
 	require('./config/routes')(router)
 	app.use(router.routes()).use(router.allowedMethods())
 
