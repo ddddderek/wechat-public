@@ -28,6 +28,8 @@ module.exports = router => {
 	router.delete('/admin/category', User.signinRequired, User.adminRequired, Category.del)
 
 	//后台的电影管理页面
+	//电影详情页
+	router.get('/movie/:_id', Movie.detail)
 	router.get('/admin/movie', User.signinRequired, User.adminRequired, Movie.show)
 	router.post('/admin/movie', User.signinRequired, User.adminRequired, koaBody({ multipart: true }), Movie.savePoster, Movie.new)
 	router.get('/admin/movie/list', User.signinRequired, User.adminRequired, Movie.list)

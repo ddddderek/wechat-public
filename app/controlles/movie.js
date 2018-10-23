@@ -9,6 +9,19 @@ const util = require('util')
 const readFileAsync = util.promisify(readFile) 
 const writeFileAsync = util.promisify(writeFile) 
 
+//电影详情页
+exports.detail = async (ctx, next) => {
+	const id = ctx.params._id
+	const movie = await Movie.findOne({ _id: id })
+
+	await Movie.update({_id: id}, { $inc: { pv: 1 } })
+
+	await ctx.render('pages/detail', {
+		title: '电影详情页',
+		movie
+	})
+}
+
 //电影的录入页面
 exports.show = async (ctx, next) => {
 	const { _id } = ctx.params

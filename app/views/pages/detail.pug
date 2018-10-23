@@ -1,0 +1,23 @@
+extends ../layout
+
+block content
+  .container
+    if movie && movie.title
+    .row
+      .col-md-7
+        if movie.poster.indexOf('http') > -1
+          img(src=movie.poster, alt=movie.title, width="600")
+        else
+          img(src='/upload/' + movie.poster, alt=movie.title, width="600")
+      .col-md-5
+        .dl-horizontal
+          dt 电影名字:
+          dt= movie.title
+          dt 导演:
+          dt= movie.director
+          dt 国家:
+          dt= movie.country
+          dt 上映年份:
+          dt= movie.year
+          dt 简介:
+          dt= movie.summary
