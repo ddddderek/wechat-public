@@ -6,9 +6,9 @@ block content
     .row
       .col-md-7
         if movie.poster.indexOf('http') > -1
-          img(src=movie.poster, alt=movie.title, width="600")
+          img(src=movie.poster, alt=movie.title style="width:100%;")
         else
-          img(src='/upload/' + movie.poster, alt=movie.title, width="600")
+          img(src='/upload/' + movie.poster, alt=movie.title style="width:100%;")
       .col-md-5
         .dl-horizontal
           dt 电影名字:

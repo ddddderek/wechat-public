@@ -31,6 +31,13 @@ const { initSchemas, connect } = require('./app/datebase/init')
 	app.use(session(app))
 	app.use(BodyParser())
 	app.use(server(resolve(__dirname, './public')))
+
+	//植入两个中间件，做前置的微信环境检查、跳转、回调的用户数据储存和状态同步
+	const wechatController = require('./app/controlles/wechat')
+
+	app.use(wechatController.checkWechat)
+  	app.use(wechatController.wechatRedirect)
+
 	app.use(async (ctx, next) => {
 		const User = mongoose.model('User')
 		let user = ctx.session.user

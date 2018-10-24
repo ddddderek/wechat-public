@@ -23,6 +23,8 @@ exports.detail = async (ctx, next) => {
 	.populate('replies.from replies.to', '_id nickname')	
 	await Movie.update({_id: id}, { $inc: { pv: 1 } })
 
+	console.log(JSON.stringify(comments))
+
 	await ctx.render('pages/detail', {
 		title: '电影详情页',
 		movie,

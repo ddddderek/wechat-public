@@ -12,6 +12,7 @@ module.exports = class WechatOAth {
 	} 
 
 	async request(options) {
+		console.log(options)
 		options = Object.assign({}, options, {json:true})
 		console.log('检查请求参数')
 		console.log(options)
@@ -37,6 +38,8 @@ module.exports = class WechatOAth {
 		const url = `${api.access_token}appid=${this.appID}&secret=${this.appSecret}&code=${code}&grant_type=authorization_code`
 
 		const res = await this.request({url})
+
+		console.log(res)
 
 		return res
 	}
