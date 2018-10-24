@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const Category = mongoose.model('Category')
+const Movie = mongoose.model('Movie')
 
 //电影分类的录入页面
 exports.show = async (ctx, next) => {
@@ -55,6 +56,9 @@ exports.del = async (ctx, next) => {
 	
 	try {
 		await Category.remove({_id: id})
+		await Movie.remove({
+			category: id
+		})
 		ctx.body = {success: true}
 	} catch (err) {
 		ctx.body = {success: false}

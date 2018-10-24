@@ -3,8 +3,10 @@ const { resolve } = require('path')
 const mongoose = require('mongoose')
 const Movie = mongoose.model('Movie')
 const Category = mongoose.model('Category') 
+const Comment = mongoose.model('Comment')
 const _ = require('lodash')
 const util = require('util')
+const api = require('../api')	
 
 const readFileAsync = util.promisify(readFile) 
 const writeFileAsync = util.promisify(writeFile) 
@@ -14,11 +16,17 @@ exports.detail = async (ctx, next) => {
 	const id = ctx.params._id
 	const movie = await Movie.findOne({ _id: id })
 
+	const comments = await Comment.find({
+		movie: id
+	})
+	.populate('from', '_id nickname')
+	.populate('replies.from replies.to', '_id nickname')	
 	await Movie.update({_id: id}, { $inc: { pv: 1 } })
 
 	await ctx.render('pages/detail', {
 		title: '电影详情页',
-		movie
+		movie,
+		comments
 	})
 }
 
@@ -49,14 +57,8 @@ exports.savePoster = async (ctx, next) => {
 		const timestamp = Date.now()
 		const type = posterData.type.split('/')[1]
 		const poster = timestamp + '.' + type
-		console.log(111111111111)
-		console.log(data)
-		console.log(3333333333333)
 		const newPath = resolve(__dirname, '../../public/upload/' + poster)
-		console.log(newPath)
-		console.log(222222222222222)
 		await writeFileAsync(newPath, data)
-		console.log(44444444444444)
 		ctx.poster = poster
 	}
 
@@ -127,10 +129,59 @@ exports.list = async (ctx, next) => {
 exports.del = async (ctx, next) => {
 	const id = ctx.query.id
 
+	const cat = await Category.findOne({
+		movies: {
+			$in: [id]
+		}
+	})
+
+	if (cat && cat.movies.length) {
+		const index = cat.movies.indexOf(id)
+		cat.movies.splice(index, 1)
+		await cat.save()
+	}
+	
 	try {
 		await Movie.remove({_id: id})
 		ctx.body = {success: true}
 	} catch (err) {
 		ctx.body = {success: false}
+	}
+}
+
+//电影搜索功能
+exports.search = async (ctx, next) => {
+	const { catId, p, q } = ctx.request.query
+	const page = parseInt(p, 10) || 0
+	const count = 2
+	const index = page * count
+
+	if (catId) {
+		const categories = await api.movie.searchByCategory(catId)
+		const category = categories[0]
+
+		let movies = category.movies || []
+		let results = movies.slice(index, index + count)
+
+		await ctx.render('pages/results', {
+			title: '分类搜索结果页面',
+			keyword: category.name,
+			currentPage: (page + 1),
+			query: 'catId=' + catId,
+			totalPage: Math.ceil(movies.length / count),
+			movies: results
+		})
+	} else {
+		let movies = await api.movie.searchByKeyword(q)
+		let results = movies.slice(index, index + count)
+
+		await ctx.render('pages/results', {
+			title: '关键词搜索结果页面',
+			keyword: q,
+			currentPage: (page + 1),
+			query: 'catId=' + q,
+			totalPage: Math.ceil(movies.length / count),
+			movies: results
+		})
 	}
 }

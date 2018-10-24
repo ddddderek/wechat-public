@@ -4,12 +4,20 @@ const User = require('../app/controlles/user')
 const Index = require('../app/controlles/index')
 const Category = require('../app/controlles/category')
 const Movie = require('../app/controlles/movie')
+const Comment = require('../app/controlles/comment')
 
 module.exports = router => {
 	router.get('/sdk', Wechat.sdk)
 
-	//用户注册登录的路由
 	router.get('/', Index.homePage)
+
+	//搜索
+	router.get('/results', Movie.search)
+
+	//评论
+	router.post('/comment', User.signinRequired, Comment.save)
+
+	//用户注册登录的路由
 	router.get('/user/signup', User.showSignup)
 	router.get('/user/signin', User.showSignin)
 	router.post('/user/signup', User.signup)

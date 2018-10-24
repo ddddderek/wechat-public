@@ -2,16 +2,28 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 const ObjectId = Schema.Types.ObjectId
 
-const CategorySchema = new Schema({
+const CommentSchema = new Schema({
 	//分类名称
-	name: {
-		unique: true,
-		type: String,
+	movie: {
+		type: ObjectId,
+		ref: 'Movie'
 	},
-	movies:[
+	from: {
+		type: ObjectId,
+		ref: 'User'
+	},
+	content:String,
+	replies:[
 		{
-			type: ObjectId,
-			ref: 'Movie'
+			from: {
+				type: ObjectId,
+				ref: 'User'
+			},
+			to: {
+				type: ObjectId,
+				ref: 'User'
+			},
+			content:String,
 		}
 	],
 	meta: {
@@ -27,7 +39,7 @@ const CategorySchema = new Schema({
 })
 
 
-CategorySchema.pre('save', function (next) {
+CommentSchema.pre('save', function (next) {
 	if (this.isNew) {
 		this.meta.createdAt = this.meta.updatedAt = Date.now()
 	} else {
@@ -38,4 +50,4 @@ CategorySchema.pre('save', function (next) {
 })
 
 
-const Category = mongoose.model('Category',CategorySchema)
+const Comment = mongoose.model('Comment',CommentSchema)
