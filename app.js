@@ -11,8 +11,10 @@ const { initSchemas, connect } = require('./app/datebase/init')
 
 
 ;(async () => {
+	//链接数据库
 	await connect(config.db)
 
+	//初始化Schema
 	initSchemas()
 
 	//生成服务器实例
@@ -20,6 +22,7 @@ const { initSchemas, connect } = require('./app/datebase/init')
 	const router = new Router
 	const views = require('koa-views')
 
+	//pug模板配置
 	app.use(views(resolve(__dirname, 'app/views'), {
 	    extension: 'pug',
 	    options: {
@@ -27,14 +30,18 @@ const { initSchemas, connect } = require('./app/datebase/init')
 	    }
 	}))
 
+	//设置session
 	app.keys = ['imooc']
 	app.use(session(app))
+
+	//请求体解析
 	app.use(BodyParser())
+
+	//静态资源文件夹
 	app.use(server(resolve(__dirname, './public')))
 
 	//植入两个中间件，做前置的微信环境检查、跳转、回调的用户数据储存和状态同步
 	const wechatController = require('./app/controlles/wechat')
-
 	app.use(wechatController.checkWechat)
   	app.use(wechatController.wechatRedirect)
 
@@ -65,6 +72,7 @@ const { initSchemas, connect } = require('./app/datebase/init')
 		
 	})
 
+	//引入routes
 	require('./config/routes')(router)
 	app.use(router.routes()).use(router.allowedMethods())
 

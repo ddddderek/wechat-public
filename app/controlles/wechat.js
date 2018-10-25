@@ -1,23 +1,11 @@
 const { reply } = require('../../wechat/reply')
 const config = require('../../config/config')
+const util = require('../../wechat-lib/util')
 const wechatMiddle = require('../../wechat-lib/middleware')
 const api = require('../api')
 
-exports.getSDKSignature = async (ctx, next) => {
-  console.log(11111111111111111111111)
-  let url = ctx.query.url
 
-  url = decodeURIComponent(url) 
-
-  const params = await api.wechat.getSignature(url)
-  console.log(params)
-  ctx.body = {
-    success: true,
-    data: params
-  }
-}
-
-//接入微信消息中间件
+//sdk介入测试中间件
 exports.sdk = async (ctx, next) => {
 	const url = ctx.href
 	const params = await api.wechat.getSignature(url)
@@ -31,6 +19,7 @@ exports.hear = async (ctx, next) => {
 	await middle(ctx, next)
 }
 
+//网页授权-获取code
 exports.oauth = async (ctx, next) => {
 	const target = config.baseUrl + 'userinfo'
 	const scope = 'snsapi_userinfo'
@@ -41,12 +30,28 @@ exports.oauth = async (ctx, next) => {
 	ctx.redirect(url)
 }
 
+//网页授权-通过code获取用户信息
 exports.userinfo = async (ctx, next) => {
 	const code = ctx.query.code
   const userData = await api.wechat.getUserinfoByCode(code)
 
 	ctx.body = userData
 }
+
+//sdk接入-获取参数接口
+exports.getSDKSignature = async (ctx, next) => {
+  let url = ctx.query.url
+
+  url = decodeURIComponent(url) 
+
+  const params = await api.wechat.getSignature(url)
+  console.log(params)
+  ctx.body = {
+    success: true,
+    data: params
+  }
+}
+
 
 //所有的网页请求都会流经这个中间件，包括微信的网页访问
 //针对 POST 非 GET 请求，不走用户授权流程
@@ -61,7 +66,7 @@ exports.checkWechat = async (ctx, next) => {
     if (code) {
       await next()
       // 如果没有 code，且来自微信访问，就可以配置授权的跳转
-    } else if (isWechat(ua)) {
+    } else if (util.isWechat(ua)) {
       const target = ctx.href
       const scope = 'snsapi_userinfo'
       console.log(scope,target)
@@ -103,11 +108,5 @@ exports.wechatRedirect = async (ctx, next) => {
   await next()
 }
 
-function isWechat (ua) {
-  if (ua.indexOf('MicroMessenger') >= 0) {
-    return true
-  } else {
-    return false
-  }
-}
+
 

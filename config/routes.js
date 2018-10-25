@@ -7,8 +7,8 @@ const Movie = require('../app/controlles/movie')
 const Comment = require('../app/controlles/comment')
 
 module.exports = router => {
-	router.get('/sdk', Wechat.sdk)
 
+	//网站首页
 	router.get('/', Index.homePage)
 
 	//搜索
@@ -43,6 +43,9 @@ module.exports = router => {
 	router.get('/admin/movie/list', User.signinRequired, User.adminRequired, Movie.list)
 	router.get('/admin/movie/update/:_id', User.signinRequired, User.adminRequired, Movie.show)
 	router.delete('/admin/movie', User.signinRequired, User.adminRequired, Movie.del)
+
+	//sdk介入测试页面
+	router.get('/sdk', Wechat.sdk)
 
 	//进入微信消息中间件
 	router.get('/wx-hear', Wechat.hear)

@@ -1,7 +1,7 @@
+const mongoose = require('mongoose')
+const config = require('../config/config')
 const Wechat = require('../wechat-lib')
 const WechatOAuth = require('../wechat-lib/oauth')
-const config = require('../config/config')
-const mongoose = require('mongoose')
 
 const Token = mongoose.model('Token')
 const Ticket = mongoose.model('Ticket')

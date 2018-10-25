@@ -2,6 +2,7 @@ const xml2js = require('xml2js')
 const template = require('./tpl')
 const sha1 = require('sha1')
 
+//解析xml
 exports.parseXML = xml => {
 	return new Promise((resolve, reject) => {
 		xml2js.parseString(xml, {trim:true}, (err,content) => {
@@ -11,7 +12,8 @@ exports.parseXML = xml => {
 	})
 }
 
-const formatMessage = result => {
+//微信推送好消息扁平化
+exports.formatMessage = result => {
 	let message = {}
 
 	if(typeof result === 'object') {
@@ -46,6 +48,7 @@ const formatMessage = result => {
 	return message
 }
 
+//生成回复消息模板
 exports.tpl = (content, message) => {
 	let type = 'text'
 
@@ -68,7 +71,14 @@ exports.tpl = (content, message) => {
 
 	return template(info)
 }
-	
+
+exports.isWechat = ua => {
+  if (ua.indexOf('MicroMessenger') >= 0) {
+    return true
+  } else {
+    return false
+  }
+}
 
 //加密签名入口方法
 exports.sign = (ticket, url) => {
@@ -85,9 +95,6 @@ exports.sign = (ticket, url) => {
 		signature
 	}
 }
-
-exports.formatMessage = formatMessage
-
 
 const _createNonce = () => {
 	return Math.random().toString(36).substr(2,16)
