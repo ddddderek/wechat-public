@@ -1,14 +1,11 @@
 const mongoose = require('mongoose')
 const Comment = mongoose.model('Comment')
+const api = require('../api')
 
 exports.save = async (ctx, next) => {
-	console.log(11111)
 	const commentData = ctx.request.body.comment
-	console.log(ctx.request.body)
 	if (commentData.cid) {
-		let comment = await Comment.findOne({
-			_id: commentData.cid
-		})
+		let comment = await api.movie.findCommentById(commentData.cid)
 
 		const reply = {
 			from: commentData.from,

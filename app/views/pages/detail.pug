@@ -160,6 +160,7 @@ block content
           data: $('#commentForm').serialize()
         }).done(function(results) {
           if (results.success) {
+            console.log('成功了')
             window.location.reload()
           }
         })

@@ -45,7 +45,7 @@ exports.getSDKSignature = async (ctx, next) => {
   url = decodeURIComponent(url) 
 
   const params = await api.wechat.getSignature(url)
-  console.log(params)
+
   ctx.body = {
     success: true,
     data: params

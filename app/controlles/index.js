@@ -1,13 +1,7 @@
-const mongoose = require('mongoose')
-const Category = mongoose.model('Category')
+const api = require('../api')
 
 exports.homePage = async (ctx, next) => {
-	const categories = await Category.find({}).populate({
-		path: 'movies',
-		select: '_id title poster',
-		options: {limit: 8}
-	})
-	console.log(categories)
+	const categories = await api.movie.findMovieByCategory()
 	await ctx.render('pages/index', {
 		title: '首页',
 		categories

@@ -17,7 +17,7 @@ module.exports = (config,reply) => {
       }
     } else if (ctx.method === 'POST') {
       if (sha !== signature) {
-        return (ctx.body = 'Failed')
+       	return (ctx.body = 'Failed')
       }
 
 			const data = await getRawBody(ctx.req, {

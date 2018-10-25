@@ -1,5 +1,6 @@
 const mongoose = require('mongoose') 
 const User = mongoose.model('User')
+const api = require('../api')
 
 // 实现一个注册页面的控制
 exports.showSignup = async (ctx, next) => {
@@ -13,14 +14,13 @@ exports.showSignin = async (ctx, next) => {
 
 // 用户数据持久化
 exports.signup = async (ctx, next) => {
-	console.log(ctx.request.body)
 	const {
 		email,
 		password,
 		nickname
 	} = ctx.request.body.user
-	console.log(email,password,nickname)
-	let user = await User.findOne({ email })
+
+	let user = await api.movie.findUserByEmail(email)
 
 	if (user) return ctx.redirect('/user/signin')
 
@@ -47,13 +47,11 @@ exports.signup = async (ctx, next) => {
 exports.signin = async (ctx, next) => {
 	const { email,password } = ctx.request.body.user
 
-	let user = await User.findOne({ email })
+	let user = await api.movie.findUserByEmail(email)
 
-	if (!user) return ctx.redirect('/signup')
+	if (!user) return ctx.redirect('user/signup')
 
 	const isMatch = await user.comparePassword(password, user.password)
-	
-	console.log(isMatch)
 
 	if (isMatch) {
 		ctx.session.user = {
@@ -75,7 +73,7 @@ exports.logout = async (ctx, next) => {
 }
 
 exports.list = async (ctx, next) => {
-	const users = await User.find({}).sort('meta.updatedAt')
+	const users = await api.movie.findUsersBySort()
 
 	await ctx.render('pages/userlist', {
 		title: '用户列表页面',
@@ -110,7 +108,7 @@ exports.del = async (ctx, next) => {
 	const id = ctx.query.id
 	
 	try {
-		await User.remove({_id: id})
+		await api.movie.removeUserById(id)
 		ctx.body = {success: true}
 	} catch (err) {
 		ctx.body = {success: false}

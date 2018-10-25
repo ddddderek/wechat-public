@@ -3,7 +3,6 @@ const { resolve } = require('path')
 const mongoose = require('mongoose')
 const Movie = mongoose.model('Movie')
 const Category = mongoose.model('Category') 
-const Comment = mongoose.model('Comment')
 const _ = require('lodash')
 const util = require('util')
 const api = require('../api')	
@@ -14,14 +13,12 @@ const writeFileAsync = util.promisify(writeFile)
 //电影详情页
 exports.detail = async (ctx, next) => {
 	const id = ctx.params._id
-	const movie = await Movie.findOne({ _id: id })
+	const movie = await api.movie.findMovieById(id)
 
-	const comments = await Comment.find({
-		movie: id
-	})
-	.populate('from', '_id nickname')
-	.populate('replies.from replies.to', '_id nickname')	
-	await Movie.update({_id: id}, { $inc: { pv: 1 } })
+	const comments = await api.movie.findCommentByMovie(id)
+
+	console.log(movie,comments)
+	await api.movie.updatePVbyMovie(id)
 
 	console.log(JSON.stringify(comments))
 
@@ -38,10 +35,10 @@ exports.show = async (ctx, next) => {
 	let movie = {}
 
 	if (_id) {
-		movie = await Movie.findOne({ _id })
+		movie = await api.movie.findCategoryById(_id)
 	}
 
-	let categories = await Category.find({})
+	let categories = await api.movie.findCategories()
 
 	await ctx.render('pages/movie_admin', {
 		title: '后台分类录入页面',
@@ -72,7 +69,7 @@ exports.new = async (ctx, next) => {
 	const movieData = ctx.request.body.fields || {}
 	let movie
 	if (movieData._id) {
-		movie = await Movie.findOne({ _id: movieData._id })
+		movie = await api.movie.findMovieById(movieData._id)
 	} 
 
 	if (ctx.poster) {
@@ -84,7 +81,7 @@ exports.new = async (ctx, next) => {
 	let category
 
 	if (categoryId) {
-		category = await Category.findOne({ _id: categoryId })
+		category = await api.movie.findCategoryById(categoryId)
 	} else if (categoryName) {
 		category = new Category({ name: categoryName })
 
@@ -101,7 +98,7 @@ exports.new = async (ctx, next) => {
 		movie = new Movie(movieData)
 	}
 
-	category = await Category.findOne({_id: category._id})
+	category = await api.movie.findCategoryById(category._id)
 
 	if (category) {
 		category.movies = category.movies || []
@@ -119,7 +116,7 @@ exports.new = async (ctx, next) => {
 
 //电影的后台列表
 exports.list = async (ctx, next) => {
-	const movies = await Movie.find({}).populate('category','name')
+	const movies = await api.movie.findMoviesPopulate()
 	
 	await ctx.render('pages/movie_list', {
 		title: '分类列表的页面',
@@ -131,11 +128,7 @@ exports.list = async (ctx, next) => {
 exports.del = async (ctx, next) => {
 	const id = ctx.query.id
 
-	const cat = await Category.findOne({
-		movies: {
-			$in: [id]
-		}
-	})
+	const cat = await api.movie.findCategoriesByMovieId(id)
 
 	if (cat && cat.movies.length) {
 		const index = cat.movies.indexOf(id)
@@ -144,7 +137,7 @@ exports.del = async (ctx, next) => {
 	}
 	
 	try {
-		await Movie.remove({_id: id})
+		await api.movie.romoveCategoryById(id)
 		ctx.body = {success: true}
 	} catch (err) {
 		ctx.body = {success: false}
@@ -157,9 +150,10 @@ exports.search = async (ctx, next) => {
 	const page = parseInt(p, 10) || 0
 	const count = 2
 	const index = page * count
-
+	console.log(catId, p, q )
 	if (catId) {
-		const categories = await api.movie.searchByCategory(catId)
+		const categories = await api.movie.findMovieByCategoryId(catId)
+		console.log(categories)
 		const category = categories[0]
 
 		let movies = category.movies || []

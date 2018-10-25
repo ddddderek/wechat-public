@@ -3,6 +3,7 @@ const User = mongoose.model('User')
 const { getOAuth, getWechat } = require('../../wechat/index')
 const util = require('../../wechat-lib/util')
 
+//微信sdk签名授权
 exports.getSignature = async (url) => {
 	const client = getWechat()
 	const data = await client.fetchAccessToken()
@@ -16,13 +17,13 @@ exports.getSignature = async (url) => {
 	return params
 }
 
+//微信网页授权
 exports.getAuthorizeUrl = (scope, target, state) => {
 	const oauth = getOAuth()
 	const url = oauth.getAuthorizeURL(scope, target, state)
 
 	return url
 }
-
 exports.getUserinfoByCode = async (code) => {
 	const oauth = getOAuth()
 	const data = await oauth.fetchAccessToken(code)
