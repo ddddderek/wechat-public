@@ -3,6 +3,20 @@ const config = require('../../config/config')
 const wechatMiddle = require('../../wechat-lib/middleware')
 const api = require('../api')
 
+exports.getSDKSignature = async (ctx, next) => {
+  console.log(11111111111111111111111)
+  let url = ctx.query.url
+
+  url = decodeURIComponent(url) 
+
+  const params = await api.wechat.getSignature(url)
+  console.log(params)
+  ctx.body = {
+    success: true,
+    data: params
+  }
+}
+
 //接入微信消息中间件
 exports.sdk = async (ctx, next) => {
 	const url = ctx.href

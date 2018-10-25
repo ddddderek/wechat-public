@@ -48,6 +48,9 @@ module.exports = router => {
 	router.get('/wx-hear', Wechat.hear)
 	router.post('/wx-hear', Wechat.hear)
 
+	//异步处理网页的签名状态
+	router.post('/wechat/signature', Wechat.getSDKSignature)
+
 	//跳到授权的中间服务页面
 	router.get('/wx-oauth', Wechat.oauth)
 	
