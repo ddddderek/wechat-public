@@ -69,7 +69,6 @@ exports.checkWechat = async (ctx, next) => {
     } else if (util.isWechat(ua)) {
       const target = ctx.href
       const scope = 'snsapi_userinfo'
-      console.log(scope,target)
       const url = api.wechat.getAuthorizeUrl(scope, target, 'fromWechat')
       ctx.redirect(url)
     } else {

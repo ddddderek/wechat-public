@@ -12,7 +12,6 @@ module.exports = class WechatOAth {
 	} 
 
 	async request(options) {
-		console.log(options)
 		options = Object.assign({}, options, {json:true})
 		console.log('检查请求参数')
 		console.log(options)
@@ -34,6 +33,7 @@ module.exports = class WechatOAth {
 		return url
 	}
 
+	//通过授权code获取用户网页中的token和openid
 	async fetchAccessToken (code) {
 		const url = `${api.access_token}appid=${this.appID}&secret=${this.appSecret}&code=${code}&grant_type=authorization_code`
 
@@ -44,6 +44,7 @@ module.exports = class WechatOAth {
 		return res
 	}
 	
+	//根据token和openid获取用户详细信息
 	async getUserInfo (token, openID, lang="zh_CN") {
 		const url = `${api.userInfo}access_token=${token}&openid=${openID}&lang=${lang}`
 
