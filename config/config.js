@@ -1,7 +1,7 @@
 module.exports = {
 	port: 3000,
 	db: 'mongodb://localhost/public',
-	baseUrl: 'http://derek.vipgz1.idcfengye.com/',
+	baseUrl: 'http://dl-115-t1.hw.icgear.net/',
 	wechat:{
 		appID: 'wx880680f7ad1e2b15',
 		appSecret: 'c57e417cea0100256cf6da6f29a72860',

@@ -1,4 +1,17 @@
 const { resolve } = require('path')
+const commonMenu = require('./menu')
+const config = require('../config/config')
+
+const help = '亲爱的，欢迎关注时光的余热\n' +
+  '回复 1-3，测试文字回复\n' +
+  '回复 4，测试图片回复\n' +
+  '回复 首页，进入网站首页\n' +
+  '回复 电影名字，查询电影信息\n' +
+  '点击帮助，获取帮助信息\n' +
+  '某些功能呢订阅号无权限，比如网页授权\n' +
+  '回复语音，查询电影信息\n' +
+  '也可以点击 <a href="' + config.baseUrl + 'sdk">语音查电影</a>，查询电影信息\n'
+
 exports.reply = async (ctx, next) => {
 	const message = ctx.weixin
 
@@ -21,7 +34,12 @@ exports.reply = async (ctx, next) => {
 			reply = `您上报的位置是${message.Latitude}-${message.Longitude}-${message.Precision}`
 			console.log(`您上报的位置是${message.Latitude}-${message.Longitude}-${message.Precision}`)
 		} else if (message.Event === 'CLICK') {
-			reply = '你点击菜单的' + message.EventKey
+			if(message.EventKey === 'help'){
+				reply = help
+			}else{
+				reply = '你点击菜单的' + message.EventKey
+			}
+			
 			console.log('你点击菜单的' + message.EventKey)
 		} else if (message.Event === 'VIEW') {
 			reply = '你点击菜单链接' + message.EventKey + message.MenuID
@@ -459,6 +477,23 @@ exports.reply = async (ctx, next) => {
 			console.log(JSON.stringify(menus))
 			
 			reply = '菜单创建成功请等待5分钟，或者先取消关注，再重新关注就可以看到新菜单'
+		}else if (content === '更新菜单') {
+			try {
+				await client.handle('deleteMenu')
+				let createData = await client.handle('createMenu', commonMenu)
+				console.log(createData)
+			} catch (e) {
+				console.log(e)
+			}
+			
+			reply = '菜单创建成功请等待5分钟，或者先取消关注，再重新关注就可以看到新菜单'
+		}else if (content === '首页') {		
+			reply = [{
+				title: '时光的预热',
+		        description: '匆匆岁月时光去，总有一款你最爱',
+		        picUrl: 'https://imoocday7.oss-cn-beijing.aliyuncs.com/WX20180701-224844.png',
+		        url: config.baseUrl
+			}]
 		}
 
 		ctx.body = reply
